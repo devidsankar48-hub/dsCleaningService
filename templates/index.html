@@ -264,6 +264,27 @@
             }
         }
 
+        // Auto-scroll Carousels
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousels = document.querySelectorAll('.card-carousel');
+            carousels.forEach(carousel => {
+                // Only auto-scroll if there is more than 1 image
+                // Note: Set to 2000ms (2 seconds) because 0.5s is too fast to read/view properly!
+                // You can change '2000' to '500' below if you strictly want 0.5 seconds.
+                if (carousel.children.length > 1) {
+                    setInterval(() => {
+                        const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+                        // If at the end (allowing 10px margin for zoom/rounding), loop back to start
+                        if (carousel.scrollLeft >= maxScroll - 10) {
+                            carousel.scrollTo({ left: 0, behavior: 'smooth' });
+                        } else {
+                            carousel.scrollBy({ left: carousel.clientWidth, behavior: 'smooth' });
+                        }
+                    }, 2000); 
+                }
+            });
+        });
+
         // WhatsApp Enquiry Integration
         function sendWhatsApp() {
             var name    = document.getElementById('name').value.trim();
