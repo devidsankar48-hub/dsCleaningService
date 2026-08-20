@@ -169,6 +169,41 @@
         </div>
     </section>
 
+    <!-- ==================== REVIEWS ==================== -->
+    <section class="reviews" id="reviews">
+        <div class="container">
+            <div class="reviews-header fade-in">
+                <h2 class="section-title">What Our Customers Say</h2>
+                <div class="rating-badge">
+                    <span class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span>
+                    <span class="rating-score">{{ biz.rating }} / 5.0</span>
+                    <p>Based on <strong>{{ biz.review_count }} ratings</strong> on <img src="https://akam.cdn.jdmagicbox.com/images/icontent/jdwap/jd_logo_14px.svg" alt="JustDial" style="height: 18px; vertical-align: middle; margin-bottom: 2px;"></p>
+                </div>
+            </div>
+            
+            <div class="reviews-grid">
+                {% for review in biz.reviews %}
+                <div class="review-card fade-in">
+                    <div class="review-stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="review-text">"{{ review.text }}"</p>
+                    <div class="review-author">
+                        <strong>{{ review.name }}</strong>
+                        <span>{{ review.date }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div style="text-align: center; margin-top: 48px;" class="fade-in">
+                <a href="{{ biz.justdial_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="border: 2px solid #1E3A5F; color: #1E3A5F; background: transparent;">
+                    Read more reviews or leave your own!
+                </a>
+            </div>
+        </div>
+    </section>
+
     <!-- ==================== AREAS WE SERVE ==================== -->
     <section class="areas" id="areas">
         <div class="container">

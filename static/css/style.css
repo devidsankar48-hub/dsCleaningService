@@ -702,6 +702,86 @@ ul { list-style: none; }
     to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ---------- Reviews ---------- */
+.reviews {
+    padding: 80px 0;
+    background: #f8f9fb;
+}
+
+.reviews-header {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.rating-badge {
+    display: inline-block;
+    background: #fff;
+    padding: 16px 32px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    border: 1px solid #e9ecef;
+}
+
+.rating-badge .stars {
+    color: #f5a623;
+    font-size: 1.2rem;
+    margin-right: 8px;
+}
+
+.rating-badge .rating-score {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #1E3A5F;
+}
+
+.rating-badge p {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    color: #666;
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.review-card {
+    background: #fff;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    border-top: 4px solid #1E3A5F;
+    display: flex;
+    flex-direction: column;
+}
+
+.review-stars {
+    color: #f5a623;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+}
+
+.review-text {
+    font-size: 0.95rem;
+    color: #444;
+    font-style: italic;
+    margin-bottom: 24px;
+    line-height: 1.6;
+    flex-grow: 1;
+}
+
+.review-author strong {
+    display: block;
+    color: #1E3A5F;
+    margin-bottom: 4px;
+}
+
+.review-author span {
+    font-size: 0.85rem;
+    color: #888;
+}
+
 /* ---------- Footer / CTA ---------- */
 .footer-cta {
     background: linear-gradient(135deg, #1E3A5F 0%, #0F2440 100%);
@@ -819,6 +899,24 @@ ul { list-style: none; }
 
     .trust-bar .container {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* --- Reviews: Horizontal Scroll --- */
+    .reviews-grid {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 16px;
+        padding-bottom: 24px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .reviews-grid::-webkit-scrollbar {
+        display: none;
+    }
+    .review-card {
+        min-width: 280px;
+        scroll-snap-align: center;
     }
 
     /* --- Services: Horizontal Scroll --- */

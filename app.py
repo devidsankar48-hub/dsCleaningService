@@ -117,6 +117,31 @@ BUSINESS = {
         'Tirupati', 'Korlagunta', 'Maruthi Nagar', 'Subash Nagar',
         'Kothapalli', 'Renigunta', 'Tiruchanoor', 'MR Palli', 'LB Nagar',
     ],
+    'rating': '4.9',
+    'review_count': '88',
+    'justdial_url': 'https://www.justdial.com/Tirupati/D-S-House-Cleaning-Services-Near-V-V-Mart-Tirupati-Bazar/9999PX877-X877-240810102743-Y3Y8_BZDET',
+    'reviews': [
+        {
+            'name': 'King',
+            'date': '01 Aug 2026',
+            'text': 'I recently used D S House Cleaning Services for my new house deep cleaning, and old house restroom maintenance. I am very happy with their work! The team was so humble, fast and efficient, getting everything done in no time.'
+        },
+        {
+            'name': 'Prasanna',
+            'date': '18 Aug 2026',
+            'text': 'I had a great experience with D S House Cleaning Services! They did an excellent job cleaning my home. The team was friendly and worked very hard. My house looks amazing now! I will definitely call them again.'
+        },
+        {
+            'name': 'Divya',
+            'date': '16 Apr',
+            'text': 'D S House Cleaning Services is amazing! They do an excellent job cleaning my home. The staff is friendly and always on time. My house looks great after they finish. They pay attention to every detail.'
+        },
+        {
+            'name': 'Sbfc Gym',
+            'date': '14 Aug',
+            'text': 'I recently hired D S House Cleaning Services for a thorough cleaning of my home, and I couldn`t be more satisfied! Their team displayed exceptional professionalism and attention to detail. Highly recommend!'
+        }
+    ],
 }
 
 # --- Cloudinary In-Memory Cache ---
