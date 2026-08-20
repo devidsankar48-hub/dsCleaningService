@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Reviews | {{ biz.name }}</title>
+    <!-- Font Awesome 6 (Professional Icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .all-reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo"></a>
+                <h1>{{ biz.name }}</h1>
+            </div>
+            <a href="{{ url_for('index') }}" class="btn btn-outline" style="border-color: #1E3A5F; color: #1E3A5F;">Back to Home</a>
+        </div>
+    </header>
+
+    <!-- REVIEWS -->
+    <section class="reviews" style="margin-top: 80px; min-height: 70vh;">
+        <div class="container">
+            <div class="reviews-header">
+                <h2 class="section-title">All Customer Reviews</h2>
+                <div class="rating-badge">
+                    <span class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span>
+                    <span class="rating-score">{{ biz.rating }} / 5.0</span>
+                    <p>Based on <strong>{{ biz.review_count }} verified ratings</strong></p>
+                </div>
+            </div>
+            
+            <div class="all-reviews-grid">
+                {% for review in biz.reviews %}
+                <div class="review-card">
+                    <div class="review-stars">
+                        {% for _ in range(review.rating) %}
+                            <i class="fa-solid fa-star"></i>
+                        {% endfor %}
+                        {% for _ in range(5 - review.rating) %}
+                            <i class="fa-regular fa-star"></i>
+                        {% endfor %}
+                    </div>
+                    <p class="review-text">"{{ review.text }}"</p>
+                    <div class="review-author">
+                        <strong>{{ review.name }}</strong>
+                        <span>{{ review.date }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER BOTTOM -->
+    <footer class="footer-bottom">
+        <div class="container">
+            &copy; 2025 {{ biz.name }}. All rights reserved. | Owner: {{ biz.owner }}
+        </div>
+    </footer>
+</body>
+</html>

@@ -116,33 +116,29 @@ BUSINESS = {
     'areas': [
         'Tirupati', 'Korlagunta', 'Maruthi Nagar', 'Subash Nagar',
         'Kothapalli', 'Renigunta', 'Tiruchanoor', 'MR Palli', 'LB Nagar',
-    ],
-    'rating': '4.9',
-    'review_count': '88',
-    'justdial_url': 'https://www.justdial.com/Tirupati/D-S-House-Cleaning-Services-Near-V-V-Mart-Tirupati-Bazar/9999PX877-X877-240810102743-Y3Y8_BZDET',
-    'reviews': [
-        {
-            'name': 'King',
-            'date': '01 Aug 2026',
-            'text': 'I recently used D S House Cleaning Services for my new house deep cleaning, and old house restroom maintenance. I am very happy with their work! The team was so humble, fast and efficient, getting everything done in no time.'
-        },
-        {
-            'name': 'Prasanna',
-            'date': '18 Aug 2026',
-            'text': 'I had a great experience with D S House Cleaning Services! They did an excellent job cleaning my home. The team was friendly and worked very hard. My house looks amazing now! I will definitely call them again.'
-        },
-        {
-            'name': 'Divya',
-            'date': '16 Apr',
-            'text': 'D S House Cleaning Services is amazing! They do an excellent job cleaning my home. The staff is friendly and always on time. My house looks great after they finish. They pay attention to every detail.'
-        },
-        {
-            'name': 'Sbfc Gym',
-            'date': '14 Aug',
-            'text': 'I recently hired D S House Cleaning Services for a thorough cleaning of my home, and I couldn`t be more satisfied! Their team displayed exceptional professionalism and attention to detail. Highly recommend!'
-        }
-    ],
+    ]
 }
+
+# --- Reviews Database (In-Memory) ---
+# Note: In a production environment on Render, this will reset on restart. 
+# A real database (like MongoDB or Supabase) should be added later for permanence.
+from datetime import datetime
+
+REVIEWS = [
+    {'name': 'King', 'date': '01 Aug 2026', 'rating': 5, 'text': 'I recently used D S House Cleaning Services for my new house deep cleaning, and old house restroom maintenance. I am very happy with their work! The team was so humble, fast and efficient, getting everything done in no time.'},
+    {'name': 'Prasanna', 'date': '18 Aug 2026', 'rating': 5, 'text': 'I had a great experience with D S House Cleaning Services! They did an excellent job cleaning my home. The team was friendly and worked very hard. My house looks amazing now! I will definitely call them again.'},
+    {'name': 'Divya', 'date': '16 Apr', 'rating': 5, 'text': 'D S House Cleaning Services is amazing! They do an excellent job cleaning my home. The staff is friendly and always on time. My house looks great after they finish. They pay attention to every detail.'},
+    {'name': 'Sbfc Gym', 'date': '14 Aug', 'rating': 4, 'text': 'I recently hired D S House Cleaning Services for a thorough cleaning of my home, and I couldn`t be more satisfied! Their team displayed exceptional professionalism and attention to detail. Highly recommend!'},
+    {'name': 'GNANA Prakash Reddy', 'date': '14 Aug', 'rating': 5, 'text': 'They provided excellent service and did a very good job. The prices were reasonable, so I felt it was fair. There were no hidden costs.'},
+    {'name': 'Monisha', 'date': '17 Jun', 'rating': 4, 'text': 'The team is friendly and works fast. My home looks so clean and fresh after they visit. I highly recommend their services to anyone.'},
+    {'name': 'Deeksha', 'date': '29 Dec', 'rating': 5, 'text': 'My home looks amazing and feels so fresh. They arrived on time and finished quickly without rushing. Excellent service all around!'}
+]
+
+def get_rating_stats():
+    if not REVIEWS:
+        return "0.0", 0
+    avg = sum(r['rating'] for r in REVIEWS) / len(REVIEWS)
+    return f"{avg:.1f}", len(REVIEWS)
 
 # --- Cloudinary In-Memory Cache ---
 cloudinary_cache = None
@@ -182,10 +178,51 @@ def get_services_with_images():
 @app.route('/')
 def index():
     """Render the main single-page website."""
-    # Create a fresh copy of BUSINESS with dynamic images
     context = dict(BUSINESS)
     context['services'] = get_services_with_images()
+    
+    avg_rating, total_reviews = get_rating_stats()
+    context['rating'] = avg_rating
+    context['review_count'] = total_reviews
+    
+    # Show only the first 5 reviews on the homepage for the horizontal scroll
+    context['reviews'] = REVIEWS[:5]
+    
     return render_template('index.html', biz=context)
+
+@app.route('/submit_review', methods=['POST'])
+def submit_review():
+    name = request.form.get('name', 'Anonymous').strip()
+    text = request.form.get('text', '').strip()
+    try:
+        rating = int(request.form.get('rating', 5))
+    except ValueError:
+        rating = 5
+
+    if name and text:
+        date_str = datetime.now().strftime("%d %b %Y")
+        REVIEWS.insert(0, {
+            'name': name,
+            'date': date_str,
+            'rating': rating,
+            'text': text
+        })
+        flash('Thank you for your review! It has been posted successfully.', 'success')
+    else:
+        flash('Please provide both your name and review text.', 'error')
+        
+    return redirect(url_for('index') + '#reviews')
+
+@app.route('/reviews')
+def all_reviews():
+    """Render a dedicated page for all reviews."""
+    context = dict(BUSINESS)
+    avg_rating, total_reviews = get_rating_stats()
+    context['rating'] = avg_rating
+    context['review_count'] = total_reviews
+    context['reviews'] = REVIEWS
+    
+    return render_template('reviews.html', biz=context)
 
 # --- SEO Routes ---
 @app.route('/robots.txt')

@@ -177,15 +177,20 @@
                 <div class="rating-badge">
                     <span class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span>
                     <span class="rating-score">{{ biz.rating }} / 5.0</span>
-                    <p>Based on <strong>{{ biz.review_count }} ratings</strong> on <img src="https://akam.cdn.jdmagicbox.com/images/icontent/jdwap/jd_logo_14px.svg" alt="JustDial" style="height: 18px; vertical-align: middle; margin-bottom: 2px;"></p>
+                    <p>Based on <strong>{{ biz.review_count }} verified ratings</strong></p>
                 </div>
             </div>
             
-            <div class="reviews-grid">
+            <div class="reviews-grid desktop-horizontal">
                 {% for review in biz.reviews %}
                 <div class="review-card fade-in">
                     <div class="review-stars">
-                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        {% for _ in range(review.rating) %}
+                            <i class="fa-solid fa-star"></i>
+                        {% endfor %}
+                        {% for _ in range(5 - review.rating) %}
+                            <i class="fa-regular fa-star"></i>
+                        {% endfor %}
                     </div>
                     <p class="review-text">"{{ review.text }}"</p>
                     <div class="review-author">
@@ -197,12 +202,44 @@
             </div>
             
             <div style="text-align: center; margin-top: 48px;" class="fade-in">
-                <a href="{{ biz.justdial_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="border: 2px solid #1E3A5F; color: #1E3A5F; background: transparent;">
-                    Read more reviews or leave your own!
+                <button onclick="document.getElementById('reviewModal').style.display='flex'" class="btn btn-call" style="margin-right: 16px;">
+                    <i class="fa-solid fa-pen"></i> Write a Review
+                </button>
+                <a href="{{ url_for('all_reviews') }}" class="btn btn-outline" style="border: 2px solid #1E3A5F; color: #1E3A5F; background: transparent;">
+                    View All Reviews
                 </a>
             </div>
         </div>
     </section>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" onclick="document.getElementById('reviewModal').style.display='none'">&times;</span>
+            <h3>Leave a Review</h3>
+            <form action="{{ url_for('submit_review') }}" method="POST" class="contact-form" style="box-shadow: none; padding: 0;">
+                <div class="form-group">
+                    <label>Your Name *</label>
+                    <input type="text" name="name" required placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label>Rating *</label>
+                    <select name="rating" required>
+                        <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
+                        <option value="4">⭐⭐⭐⭐ - Good</option>
+                        <option value="3">⭐⭐⭐ - Average</option>
+                        <option value="2">⭐⭐ - Poor</option>
+                        <option value="1">⭐ - Terrible</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Your Review *</label>
+                    <textarea name="text" required placeholder="Tell us about your experience..." rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn-submit" style="width: 100%;">Submit Review</button>
+            </form>
+        </div>
+    </div>
 
     <!-- ==================== AREAS WE SERVE ==================== -->
     <section class="areas" id="areas">

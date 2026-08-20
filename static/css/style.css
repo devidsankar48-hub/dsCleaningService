@@ -741,9 +741,16 @@ ul { list-style: none; }
 }
 
 .reviews-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
     gap: 24px;
+    padding-bottom: 24px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.reviews-grid::-webkit-scrollbar {
+    display: none;
 }
 
 .review-card {
@@ -754,6 +761,10 @@ ul { list-style: none; }
     border-top: 4px solid #1E3A5F;
     display: flex;
     flex-direction: column;
+    min-width: 320px;
+    max-width: 350px;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
 }
 
 .review-stars {
@@ -780,6 +791,43 @@ ul { list-style: none; }
 .review-author span {
     font-size: 0.85rem;
     color: #888;
+}
+
+/* Modal Overlay for Reviews */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.modal-content {
+    background: #fff;
+    padding: 40px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.close-modal {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #888;
+}
+.close-modal:hover { color: #333; }
+.modal-content h3 {
+    margin-bottom: 24px;
+    color: #1E3A5F;
 }
 
 /* ---------- Footer / CTA ---------- */
