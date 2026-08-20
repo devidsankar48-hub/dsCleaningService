@@ -130,7 +130,16 @@ if db_url.startswith("postgres://"):
 elif db_url.startswith("postgresql://"):
     db_url = db_url.replace("postgresql://", "postgresql+pg8000://", 1)
 
+# pg8000 doesn't support the 'sslmode' query parameter natively, so we strip it
+if "?" in db_url:
+    db_url = db_url.split("?")[0]
+
+import ssl
+# We explicitly tell SQLAlchemy to use SSL for the connection
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    "connect_args": {"ssl_context": ssl.create_default_context()}
+} if "local.db" not in db_url else {}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
