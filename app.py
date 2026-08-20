@@ -1,15 +1,23 @@
 import os
 from flask import Flask, render_template, request, flash, redirect, url_for, session
 from werkzeug.utils import secure_filename
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 app = Flask(__name__)
 app.secret_key = 'ds-house-cleaning-service-2024'
 
+# --- Cloudinary Configuration ---
+cloudinary.config(
+    cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME", "uo6e0lqa"),
+    api_key = os.environ.get("CLOUDINARY_API_KEY", "816811886594347"),
+    api_secret = os.environ.get("CLOUDINARY_API_SECRET") # MUST BE SET IN RENDER!
+)
+
 # --- Admin Configuration ---
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin")  # Reads from Render env var, defaults to 'admin' locally
-UPLOAD_FOLDER = os.path.join('static', 'images', 'services')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -111,17 +119,38 @@ BUSINESS = {
     ],
 }
 
+# --- Cloudinary In-Memory Cache ---
+cloudinary_cache = None
+
 def get_services_with_images():
-    """Helper to dynamically inject the list of images into each service."""
+    """Helper to dynamically inject the list of images from Cloudinary."""
+    global cloudinary_cache
+    
+    # Refresh cache if empty (runs on boot or after an upload/delete)
+    if cloudinary_cache is None:
+        cloudinary_cache = {s['id']: [] for s in BUSINESS['services']}
+        try:
+            # Fetch all resources in the 'services/' folder
+            if os.environ.get("CLOUDINARY_API_SECRET"):
+                response = cloudinary.api.resources(type="upload", prefix="services/", max_results=500)
+                for res in response.get('resources', []):
+                    public_id = res['public_id']  # e.g., 'services/painting/xyz123'
+                    parts = public_id.split('/')
+                    if len(parts) >= 3:
+                        service_id = parts[1]
+                        if service_id in cloudinary_cache:
+                            cloudinary_cache[service_id].append({
+                                'url': res['secure_url'],
+                                'public_id': public_id
+                            })
+        except Exception as e:
+            print("Cloudinary fetch error:", e)
+
+    # Attach cached images to services
     services = []
     for s in BUSINESS['services']:
         service_copy = dict(s)
-        service_dir = os.path.join(app.config['UPLOAD_FOLDER'], s['id'])
-        images = []
-        if os.path.exists(service_dir):
-            images = [f for f in os.listdir(service_dir) if allowed_file(f)]
-            images.sort()
-        service_copy['images'] = images
+        service_copy['images'] = cloudinary_cache.get(s['id'], [])
         services.append(service_copy)
     return services
 
@@ -155,58 +184,58 @@ def admin():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
         
-    context = dict(BUSINESS)
-    context['services'] = get_services_with_images()
+    global cloudinary_cache
 
     if request.method == 'POST':
+        if not os.environ.get("CLOUDINARY_API_SECRET"):
+            flash("Cloudinary API Secret is missing! Set it in Render Environment Variables.", "error")
+            return redirect(url_for('admin'))
+
         service_id = request.form.get('service_id')
         if 'image' not in request.files:
             flash('No file part', 'error')
             return redirect(request.url)
             
         files = request.files.getlist('image')
-        service_dir = os.path.join(app.config['UPLOAD_FOLDER'], service_id)
-        
-        # Ensure directory exists
-        os.makedirs(service_dir, exist_ok=True)
-        
         uploaded_count = 0
+        
         for file in files:
             if file and file.filename and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                
-                # Check if it already exists, append random/number if needed (simplified here)
-                file_path = os.path.join(service_dir, filename)
-                counter = 1
-                while os.path.exists(file_path):
-                    name, ext = os.path.splitext(filename)
-                    file_path = os.path.join(service_dir, f"{name}_{counter}{ext}")
-                    counter += 1
-                    
-                file.save(file_path)
-                uploaded_count += 1
+                try:
+                    # Upload directly to Cloudinary folder e.g., 'services/painting/'
+                    cloudinary.uploader.upload(file, folder=f"services/{service_id}/")
+                    uploaded_count += 1
+                except Exception as e:
+                    print("Upload error:", e)
                 
         if uploaded_count > 0:
             flash(f'Successfully uploaded {uploaded_count} image(s) for {service_id}', 'success')
+            cloudinary_cache = None  # Invalidate cache to force a refresh!
         else:
             flash('No valid images uploaded', 'error')
             
         return redirect(url_for('admin'))
 
+    context = dict(BUSINESS)
+    context['services'] = get_services_with_images()
     return render_template('admin.html', biz=context)
 
-@app.route('/admin/delete/<service_id>/<filename>', methods=['POST'])
-def delete_image(service_id, filename):
+@app.route('/admin/delete', methods=['POST'])
+def delete_image():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
         
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(service_id), secure_filename(filename))
-    if os.path.exists(file_path):
-        os.remove(file_path)
-        flash(f'Deleted image {filename}', 'success')
-    else:
-        flash('File not found', 'error')
-        
+    global cloudinary_cache
+    public_id = request.form.get('public_id')
+
+    if public_id:
+        try:
+            cloudinary.uploader.destroy(public_id)
+            flash('Image deleted successfully', 'success')
+            cloudinary_cache = None  # Invalidate cache
+        except Exception as e:
+            flash(f'Failed to delete image: {e}', 'error')
+            
     return redirect(url_for('admin'))
 
 

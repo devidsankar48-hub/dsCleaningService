@@ -55,8 +55,9 @@
                 {% if service.images %}
                     {% for img in service.images %}
                     <div class="img-wrapper">
-                        <img src="{{ url_for('static', filename='images/services/' + service.id + '/' + img) }}">
-                        <form action="{{ url_for('delete_image', service_id=service.id, filename=img) }}" method="POST" onsubmit="return confirm('Delete this image?');">
+                        <img src="{{ img.url }}">
+                        <form action="{{ url_for('delete_image') }}" method="POST" onsubmit="return confirm('Delete this image?');">
+                            <input type="hidden" name="public_id" value="{{ img.public_id }}">
                             <button type="submit" class="delete-btn" title="Delete"><i class="fa-solid fa-times"></i></button>
                         </form>
                     </div>

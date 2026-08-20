@@ -91,7 +91,7 @@
                         <div class="card-carousel" id="carousel-{{ service.id }}">
                             {% if service.images %}
                                 {% for img in service.images %}
-                                    <img src="{{ url_for('static', filename='images/services/' + service.id + '/' + img) }}" alt="{{ service.name }} in Tirupati" loading="lazy">
+                                    <img src="{{ img.url }}" alt="{{ service.name }} in Tirupati" loading="lazy">
                                 {% endfor %}
                             {% else %}
                                 <div class="no-image-placeholder">No images yet</div>
