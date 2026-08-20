@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = 'ds-house-cleaning-service-2024'
 
 # --- Admin Configuration ---
-ADMIN_PASSWORD = "admin"  # Simple hardcoded password for now
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin")  # Reads from Render env var, defaults to 'admin' locally
 UPLOAD_FOLDER = os.path.join('static', 'images', 'services')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
