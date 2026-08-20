@@ -22,12 +22,15 @@
 <body>
     <!-- HEADER -->
     <header class="header">
-        <div class="container header-container">
-            <div class="logo">
-                <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo"></a>
-                <h1>{{ biz.name }}</h1>
-            </div>
-            <a href="{{ url_for('index') }}" class="btn btn-outline" style="border-color: #1E3A5F; color: #1E3A5F;">Back to Home</a>
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; padding-bottom: 12px;">
+            <a href="{{ url_for('index') }}" class="header-logo">
+                <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="{{ biz.name }} Logo">
+                <div class="brand-text">
+                    <span class="brand-name">{{ biz.name }}</span>
+                    <span class="brand-tagline">{{ biz.tagline }}</span>
+                </div>
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline" style="border-color: #1E3A5F; color: #1E3A5F; padding: 8px 16px;">Back to Home</a>
         </div>
     </header>
 

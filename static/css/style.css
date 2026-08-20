@@ -74,6 +74,7 @@
 
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: 100px; /* Prevents anchor links from hiding under sticky header */
     font-size: 16px;
 }
 
