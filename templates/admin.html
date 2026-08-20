@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - {{ biz.name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .admin-header { background: #1E3A5F; color: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .admin-header a { color: #fff; text-decoration: underline; }
+        .admin-container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .service-admin-card { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .service-admin-card h3 { color: #1E3A5F; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        
+        .image-gallery { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 20px; }
+        .img-wrapper { position: relative; flex: 0 0 150px; }
+        .img-wrapper img { width: 150px; height: 100px; object-fit: cover; border-radius: 6px; }
+        .delete-btn { position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; }
+        
+        .upload-area { background: #f9f9f9; padding: 20px; border: 2px dashed #ccc; border-radius: 8px; text-align: center; }
+        .upload-area input[type=file] { margin-bottom: 10px; }
+    </style>
+</head>
+<body style="background: #F8F9FA;">
+
+    <div class="admin-header">
+        <h2><i class="fa-solid fa-gear"></i> Admin Dashboard</h2>
+        <div>
+            <a href="/" target="_blank">View Site</a> | 
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="admin-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <p style="margin-bottom: 30px;">
+            <strong>Note:</strong> Upload images for each service here. These images will be displayed as a swiping carousel on the main website.
+            <em>(Since your app runs on Render's free tier, uploaded images might disappear when the server restarts unless they are pushed via Git).</em>
+        </p>
+
+        {% for service in biz.services %}
+        <div class="service-admin-card">
+            <h3><i class="{{ service.icon }}"></i> {{ service.name }}</h3>
+            
+            <!-- Current Images -->
+            <div class="image-gallery">
+                {% if service.images %}
+                    {% for img in service.images %}
+                    <div class="img-wrapper">
+                        <img src="{{ url_for('static', filename='images/services/' + service.id + '/' + img) }}">
+                        <form action="{{ url_for('delete_image', service_id=service.id, filename=img) }}" method="POST" onsubmit="return confirm('Delete this image?');">
+                            <button type="submit" class="delete-btn" title="Delete"><i class="fa-solid fa-times"></i></button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #888;">No images uploaded yet.</p>
+                {% endif %}
+            </div>
+
+            <!-- Upload Form -->
+            <div class="upload-area">
+                <form action="/admin" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="service_id" value="{{ service.id }}">
+                    <label><strong>Add Images:</strong></label><br>
+                    <input type="file" name="image" multiple accept="image/*" required>
+                    <button type="submit" class="btn btn-submit" style="width:auto; padding: 8px 16px;">Upload</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>
