@@ -178,6 +178,10 @@
                         <small class="field-hint" id="phoneHint"></small>
                     </div>
                     <div class="form-group">
+                        <label for="location"><i class="fa-solid fa-location-dot"></i> Your Location *</label>
+                        <input type="text" id="location" name="location" placeholder="Enter your area or address" required>
+                    </div>
+                    <div class="form-group">
                         <label for="service"><i class="fa-solid fa-broom"></i> Service Required</label>
                         <select id="service" name="service">
                             <option value="">-- Select a Service --</option>
@@ -287,18 +291,19 @@
 
         // WhatsApp Enquiry Integration
         function sendWhatsApp() {
-            var name    = document.getElementById('name').value.trim();
-            var phone   = document.getElementById('phone').value.trim();
-            var service = document.getElementById('service').value;
-            var message = document.getElementById('message').value.trim();
-            var hint    = document.getElementById('phoneHint');
+            var name     = document.getElementById('name').value.trim();
+            var phone    = document.getElementById('phone').value.trim();
+            var location = document.getElementById('location').value.trim();
+            var service  = document.getElementById('service').value;
+            var message  = document.getElementById('message').value.trim();
+            var hint     = document.getElementById('phoneHint');
 
             // Clear previous hint
             hint.textContent = '';
             hint.className = 'field-hint';
 
-            if (!name) {
-                alert('Please enter your name.');
+            if (!name || !location) {
+                alert('Please enter your name and location.');
                 return false;
             }
 
@@ -314,6 +319,7 @@
             var waMsg = '🏠 *New Enquiry — D.S. House Cleaning Service*\n\n';
             waMsg += '👤 *Name:* ' + name + '\n';
             waMsg += '📞 *Phone:* +91 ' + phone + '\n';
+            waMsg += '📍 *Location:* ' + location + '\n';
             if (service) {
                 waMsg += '🔧 *Service:* ' + service + '\n';
             }
