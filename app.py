@@ -119,12 +119,28 @@ BUSINESS = {
     ]
 }
 
-# --- Reviews Database (In-Memory) ---
-# Note: In a production environment on Render, this will reset on restart. 
-# A real database (like MongoDB or Supabase) should be added later for permanence.
+# --- Database Configuration (Neon PostgreSQL) ---
 from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
 
-REVIEWS = [
+# Fix postgres:// to postgresql:// for SQLAlchemy compatibility
+db_url = os.environ.get("DATABASE_URL", "sqlite:///local.db")
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    rating = db.Column(db.Integer, nullable=False, default=5)
+    text = db.Column(db.Text, nullable=False)
+    date_str = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+INITIAL_REVIEWS = [
     {'name': 'King', 'date': '01 Aug 2026', 'rating': 5, 'text': 'I recently used D S House Cleaning Services for my new house deep cleaning, and old house restroom maintenance. I am very happy with their work! The team was so humble, fast and efficient, getting everything done in no time.'},
     {'name': 'Prasanna', 'date': '18 Aug 2026', 'rating': 5, 'text': 'I had a great experience with D S House Cleaning Services! They did an excellent job cleaning my home. The team was friendly and worked very hard. My house looks amazing now! I will definitely call them again.'},
     {'name': 'Divya', 'date': '16 Apr', 'rating': 5, 'text': 'D S House Cleaning Services is amazing! They do an excellent job cleaning my home. The staff is friendly and always on time. My house looks great after they finish. They pay attention to every detail.'},
@@ -134,11 +150,20 @@ REVIEWS = [
     {'name': 'Deeksha', 'date': '29 Dec', 'rating': 5, 'text': 'My home looks amazing and feels so fresh. They arrived on time and finished quickly without rushing. Excellent service all around!'}
 ]
 
-def get_rating_stats():
-    if not REVIEWS:
+with app.app_context():
+    db.create_all()
+    # Seed the database with the initial 7 reviews if empty
+    if Review.query.count() == 0:
+        for r in INITIAL_REVIEWS:
+            new_rev = Review(name=r['name'], rating=r['rating'], text=r['text'], date_str=r['date'])
+            db.session.add(new_rev)
+        db.session.commit()
+
+def get_rating_stats(reviews_list):
+    if not reviews_list:
         return "0.0", 0
-    avg = sum(r['rating'] for r in REVIEWS) / len(REVIEWS)
-    return f"{avg:.1f}", len(REVIEWS)
+    avg = sum(r.rating for r in reviews_list) / len(reviews_list)
+    return f"{avg:.1f}", len(reviews_list)
 
 # --- Cloudinary In-Memory Cache ---
 cloudinary_cache = None
@@ -147,15 +172,13 @@ def get_services_with_images():
     """Helper to dynamically inject the list of images from Cloudinary."""
     global cloudinary_cache
     
-    # Refresh cache if empty (runs on boot or after an upload/delete)
     if cloudinary_cache is None:
         cloudinary_cache = {s['id']: [] for s in BUSINESS['services']}
         try:
-            # Fetch all resources in the 'services/' folder
             if os.environ.get("CLOUDINARY_API_SECRET"):
                 response = cloudinary.api.resources(type="upload", prefix="services/", max_results=500)
                 for res in response.get('resources', []):
-                    public_id = res['public_id']  # e.g., 'services/painting/xyz123'
+                    public_id = res['public_id']
                     parts = public_id.split('/')
                     if len(parts) >= 3:
                         service_id = parts[1]
@@ -167,7 +190,6 @@ def get_services_with_images():
         except Exception as e:
             print("Cloudinary fetch error:", e)
 
-    # Attach cached images to services
     services = []
     for s in BUSINESS['services']:
         service_copy = dict(s)
@@ -181,12 +203,13 @@ def index():
     context = dict(BUSINESS)
     context['services'] = get_services_with_images()
     
-    avg_rating, total_reviews = get_rating_stats()
+    # Fetch reviews from Neon Database
+    all_revs = Review.query.order_by(Review.id.desc()).all()
+    avg_rating, total_reviews = get_rating_stats(all_revs)
+    
     context['rating'] = avg_rating
     context['review_count'] = total_reviews
-    
-    # Show only the first 5 reviews on the homepage for the horizontal scroll
-    context['reviews'] = REVIEWS[:5]
+    context['reviews'] = all_revs[:5]  # Show top 5 on homepage
     
     return render_template('index.html', biz=context)
 
@@ -201,12 +224,9 @@ def submit_review():
 
     if name and text:
         date_str = datetime.now().strftime("%d %b %Y")
-        REVIEWS.insert(0, {
-            'name': name,
-            'date': date_str,
-            'rating': rating,
-            'text': text
-        })
+        new_rev = Review(name=name, rating=rating, text=text, date_str=date_str)
+        db.session.add(new_rev)
+        db.session.commit()
         flash('Thank you for your review! It has been posted successfully.', 'success')
     else:
         flash('Please provide both your name and review text.', 'error')
@@ -217,10 +237,14 @@ def submit_review():
 def all_reviews():
     """Render a dedicated page for all reviews."""
     context = dict(BUSINESS)
-    avg_rating, total_reviews = get_rating_stats()
+    
+    # Fetch ALL reviews from Neon Database
+    all_revs = Review.query.order_by(Review.id.desc()).all()
+    avg_rating, total_reviews = get_rating_stats(all_revs)
+    
     context['rating'] = avg_rating
     context['review_count'] = total_reviews
-    context['reviews'] = REVIEWS
+    context['reviews'] = all_revs
     
     return render_template('reviews.html', biz=context)
 
