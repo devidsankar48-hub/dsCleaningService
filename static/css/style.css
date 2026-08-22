@@ -748,6 +748,7 @@ ul { list-style: none; }
 .reviews-grid {
     display: flex;
     overflow-x: auto;
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
     gap: 24px;
     padding-bottom: 24px;
@@ -958,6 +959,7 @@ ul { list-style: none; }
     .reviews-grid {
         display: flex;
         overflow-x: auto;
+        overflow-y: hidden;
         scroll-snap-type: x mandatory;
         gap: 16px;
         padding-bottom: 24px;
@@ -976,6 +978,7 @@ ul { list-style: none; }
     .services-grid {
         display: flex;
         overflow-x: auto;
+        overflow-y: hidden;
         scroll-snap-type: x mandatory;
         gap: 16px;
         padding-bottom: 8px;
@@ -1015,6 +1018,7 @@ ul { list-style: none; }
     .why-grid {
         display: flex;
         overflow-x: auto;
+        overflow-y: hidden;
         scroll-snap-type: x mandatory;
         gap: 16px;
         padding-bottom: 8px;
