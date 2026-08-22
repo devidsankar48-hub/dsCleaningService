@@ -201,8 +201,8 @@
                 {% endfor %}
             </div>
             
-            <div style="text-align: center; margin-top: 48px;" class="fade-in">
-                <button onclick="document.getElementById('reviewModal').style.display='flex'" class="btn btn-call" style="margin-right: 16px;">
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 48px;" class="fade-in">
+                <button onclick="document.getElementById('reviewModal').style.display='flex'" class="btn btn-call">
                     <i class="fa-solid fa-pen"></i> Write a Review
                 </button>
                 <a href="{{ url_for('all_reviews') }}" class="btn btn-outline" style="border: 2px solid #1E3A5F; color: #1E3A5F; background: transparent;">
