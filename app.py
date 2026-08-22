@@ -137,9 +137,14 @@ if "?" in db_url:
 import ssl
 # We explicitly tell SQLAlchemy to use SSL for the connection
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    "connect_args": {"ssl_context": ssl.create_default_context()}
-} if "local.db" not in db_url else {}
+engine_options = {
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
+}
+if "local.db" not in db_url:
+    engine_options["connect_args"] = {"ssl_context": ssl.create_default_context()}
+
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
